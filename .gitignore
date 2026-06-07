@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.env
+*.zip
+Clinical_Report_*.txt
+Clinical_Result_*.json
+Clinical_Output_*.zip
+.ipynb_checkpoints/
+*.pt
+*.bin
+*.safetensors

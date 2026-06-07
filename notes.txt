@@ -1,0 +1,77 @@
+# Limitations of the Paper & Our Proposed Improvements
+
+---
+
+## 1. Groupthink → Introduce an Advocate Agent
+
+**Paper's problem:**
+Agents with a correct initial vote sometimes flip to match the majority, even when the majority is wrong. The collaborative mechanism that is supposed to correct errors ends up amplifying them.
+
+**Our improvement:**
+Add a dedicated "Devil's Advocate" agent whose job is to always challenge the emerging consensus. If 4 agents say Yes, this agent is specifically prompted to find reasons for No — forcing the group to justify their decision rather than blindly agree.
+
+---
+
+## 2. Single LLM → Multiple Small Specialist Models
+
+**Paper's problem:**
+All 5 specialists are the same LLaMA-70B model with different prompts. The "diversity" is fake — it's the same brain thinking from different angles. Underlying biases and knowledge gaps are shared across all agents.
+
+**Our improvement:**
+Use multiple smaller models (e.g., LLaMA-8B, Mistral-7B, Gemma-9B) each acting as a different specialist. This gives genuine cognitive diversity — different models have different training data, different strengths, and different blind spots. Real disagreement becomes possible.
+
+---
+
+## 3. Only Prompt Engineering → Can Fine-tune Specialists
+
+**Paper's problem:**
+Specialization is entirely done through system prompts at inference time. The model is never actually trained to be a Nephrologist or Cardiologist — it just role-plays one.
+
+**Our improvement:**
+Fine-tune each small specialist model on domain-specific medical data. For example, fine-tune the Nephrologist model on nephrology case studies and literature. This makes the specialization genuine, not simulated, and improves accuracy on domain-specific reasoning.
+
+---
+
+## 4. Parallelism → No Quality Advantage, Only Speed
+
+**Paper's claim:**
+The paper presents parallel execution of agents as a feature of the system.
+
+**Reality:**
+Since all agents share the same single LLM, parallelism gives zero improvement in reasoning quality. Whether you call agents simultaneously or one after another, each agent sees the same input and the same model produces the output. The only benefit is reduced wall-clock time.
+
+**Our improvement:**
+If we switch to multiple small models (point 2 above), then true parallelism becomes meaningful — different models running simultaneously on different GPUs gives both speed and genuine diversity.
+
+---
+
+## 5. Binary Yes/No Output → Confidence Score (0 to 1)
+
+**Paper's problem:**
+Each agent outputs only Yes or No. A confident Yes and a very uncertain Yes are treated identically. This loses important information about how sure each agent actually is.
+
+**Our improvement:**
+Have each agent output a confidence score between 0 and 1 alongside their vote. For example: {"vote": "Yes", "confidence": 0.85, "reasoning": "..."}. This allows more nuanced aggregation — a highly confident Yes should outweigh an uncertain Yes.
+
+---
+
+## 6. Static Consensus Threshold (80%) → Dynamic Weighted Voting
+
+**Paper's problem:**
+The consensus threshold is hard-coded at 80% — meaning 4 out of 5 agents must agree. Every agent's vote counts equally regardless of their confidence or expertise relevance.
+
+**Our improvement:**
+Make consensus dynamic by weighting each agent's vote by their confidence score (from point 5). A specialist with 0.95 confidence contributes more to consensus than one with 0.55 confidence. The threshold itself can also adapt based on the complexity of the case.
+
+---
+
+## 7. No External Knowledge → Implement RAG
+
+**Paper's problem:**
+Agents rely entirely on knowledge baked into the LLM during pretraining. They cannot look up specific lab thresholds, drug interactions, or updated clinical guidelines. If the model's parametric knowledge is outdated or incomplete, there is no way to correct it during inference.
+
+**Our improvement:**
+Implement Retrieval-Augmented Generation (RAG) — give agents the ability to query a medical knowledge base (e.g., clinical guidelines, drug databases, lab reference ranges) during the debate. Before making a decision, an agent can retrieve relevant facts and ground its reasoning in verified, up-to-date information.
+
+
+
